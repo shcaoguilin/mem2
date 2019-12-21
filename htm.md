@@ -240,10 +240,63 @@
 
 ### 初始化
 - 在 接收 任何 输入 之前，靠    对 每个 列    计算 初始 潜在 synapse 列表,以 初始化 该区。这 包含    从 该 输入 空间     选择的  输入(们) 的随机集合。每个 输入 用    一个 synapse,并 给(该synapse) 赋以 随机 紧结 值       来 表示。该 随机 紧结 值  用 两个标准 选出来的。  第一，该 紧结指(们) 是 从       在 connectedPerm(为中心)的小区间       中 选择的。connectedPerm(译注:允许连接:允许成为已连接的界限紧结值). connectedPerm(一个synpase被认为是"已连接"的最小紧结值)。在 少量的 训练 伦次 后, 这 (就) 能使得(启用) 潜在synapse(们) 变成 已连接（或已断开）。第二，每个 列  以    该输入区的自然中心      为 中心(译注:不太确定这句话意思,是列的中心还是区的中心)，朝 这个 中心,紧结值(们)  有一个 偏执（在中心附近,紧结有更高的值）。
+
 ### 阶段1:覆盖
+- 给定 一个 输入 向量，用 该 向量, 阶段1 计算 每个列的 覆盖。每个列的 覆盖 简单(来说) 是   跟 激活 输入 连接的 synapse(们)的 个数        乘以      它的 鼓励(boost)。如果 这个值 (是) 低于 minOverlap，我们    把 该overlap 设置 为零。
+```python
+1. for c in columns
+2. 
+3.     overlap(c) = 0
+4.     for s in connectedSynapses(c)
+5.         overlap(c) = overlap(c) + input(t,s.sourceInput)
+6. 
+7.     if overlap(c) < minOverlap then
+8.         overlap(c) = 0
+9.     else
+10.        overlap(c) = overlap(c) * boost(c)
+```
+
 ### 阶段2:抑制
+- 第二 阶段 
+
 ### 阶段3:学习
+
 ### 支持的 数据结构 和 例程
+- 在 伪码 中, 用到了 下面的 变量 和 数据结构。
+
+| 名字 | 解释 |
+| :----------:| :----- |
+| columns | 列表,全部列 |
+| input(t,j) | 在时刻t,给 该级 的 输入。如果第j个输入是开,则input(t,j)为1 |
+| overlap(c) | 在一个特定输入模式下,列c的 空间相似则同表示 的 overlap |
+| activeColumns(t) | 由于自下而上的输入,赢的列下标列表 |
+| desiredLocalActivity | 在抑制步骤后,控制赢的列个数,的参数 |
+| inhibitionRadius | 列(们)的平均连接接收区域尺寸 |
+| neighbors(c) | 在列c的inbitionRadius内的全部列 |
+| minOverlap | 在抑制步骤期间,一个不被淘汰的列,必须有的最少激活输入 |
+| boost(c) | 列c的鼓励值 |
+| synapse | 一个 数据结构 表示 一个 synapse----包含 一个 紧结值 和 源输入下表  |
+| connectedPerm | 如果 一个 synapse的 紧结值 比connectedPerm大,就说 它 是 已连接的。 |
+| potentialSynapses(c) | c的潜在synapse列表,以及(这些)synapse的紧结值 |
+| connectedSynapses(c) | potentialSynapses(c)的一个子集,在该子集中,紧结值 比 connectedPerm大。有 自下而上的输入,当前 连接到 列c。 |
+| permanenceInc | 在 学习 期间,synapse(们)的 紧结值 被 增加的量 |
+| permanenceDec | 在 学习 期间,synapse(们)的 紧结值 被 降低的量 |
+| activeDutyCycle(c) | (c的激活负载周期). 一个 滑动 平均值,表示, 在 c 抑制 后,c被 激活的 频率  |
+| overlapDutyCycle(c) | (c的overlap负载周期).一个 滑动 平均值,表示  在它的输入(下) 列c 有 显著 overlap（比如 比minOverlap大）的频率。（比如 最近 1k个 轮次） |
+| minDutyCycle(c) | (c的最小占空比;c的最小负载周期).对一个细胞,表示 最小希望开火速率 的一个变量。如果 一个 细胞的 开火速率 低于 该值，它 会 被 鼓励。该值 被 计算 为,它的邻居(们)的最大开火速率的1%。 |
+
+- 下面的 支持 例程 被 用 在 以上 代码 (中)。
+| 名字 | 解释 |
+| :----------:| :----- |
+| kthScore(cols,k) | 给定列列表cols,返回 第k高的(译:还是前k个) overlap值 |
+| updateActiveDutyCycle(c) | 计算 一个 移动 平均值,在 抑制 后,c 被 激活 的 频率  |
+| updateOverlapDutyCycle(c) | 计算 一个 移动 平均值,在 c 有          比miniOverlap 大的  overlap     的频率 |
+| averageReceptiveFieldSize(c) | 全部 列 的 已连接的接收域 尺寸 的 平均半径。一个列 的 已连接的接收域 尺寸 只 包含 该 已连接的 synapse(们)（这些synapse的permanence值>=connectedPerm）。这 被 用于 决定    在 列 之间 的 兄弟(横向) 抑制 的 范围。  |
+| maxDutyCycle(c) | 在 一个 给定 列 列表 (中),返回,该 列(们)的 最大 激活负载周期。   |
+| increasePermanences(c,s) | 按 一个 标量 因子 s,增加 在 列 c 中的 每一个 synapse的 紧结值。  |
+| boostFunction(c) | 返回 一个 列的  鼓励值。该 鼓励值 是 一个 >=1 的 标量。如果 activeDutyCycle(c) 高于 miniDutyCycle(c), 该 鼓励值 是1。 一旦 该 列 的 activeDutyCycle 开始 下落 到 他的 minDutyCycle 之下, 该 鼓励值 线性地 增长。  |
+
+
 
 ## 4 临时 池化 实现、伪码
 
