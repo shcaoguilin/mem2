@@ -258,8 +258,47 @@
 
 ### 阶段2:抑制
 - 第二 阶段 
+- 第二阶段 计算,在 抑制 步骤 后,哪些列 作为 赢者 剩余。desiredLocalActivity 是 一个  　 控制 最后 赢 的 列 个数 的　    参数。例如，如果 desiredLocalActivity 是 10，一个 列 会 是 赢者,如果 他的 overlap 分 比 　在 抑制半径 内 　的 第10高 的 列 的 分数 高。
+```pypthon
+11. for c in columns
+12. 
+13.     minLocalActivity = kthScore(neighbors(c),desiredLocalActivity)
+14. 
+15.     if overlap(c) > 0 and overlap(c) >= miniLocalActivity then
+16.         activiColumns(t).append(c)
+17.
+```
 
 ### 阶段3:学习
+- 第三阶段 执行 学习，他 更新 全部 必要的 synapse(们)的 紧结值，也 更新 鼓励 和 抑制半径。
+- 主要 学习 规则 实现在 行 20-26。对于 赢的 列(们)，如果 一个 synapse 是 激活的 ，他的 紧结值 是 增加的，否则 他的 紧结值 是 降低的。紧结值 被 限制在 0 到 1 之间。
+- 行 28-36 实现 鼓励。在 合适的 位置,有 两个 分离的 鼓励 方法,帮助 一个 列 学习 连接(们)。如果 一个列 不是 赢的 足够 频繁（以activeDutyCycle测量）。他的 全部 鼓励值 会 降低（行30-32）。Alternatively，如果 一个列的 已连接的 synapse(们) 没有 和 任何输入 覆盖的 足够频繁（以overlapDutCycle测量），他的 紧结值 会 被 鼓励（行34-36）。注意：一旦 学习 被 关闭，c的鼓励 被 冻结。
+- 最后，阶段三的结尾,重算 抑制半径（行38）。
+
+```python
+18. for c in activeColumns(t):
+19. 
+20.     for s in potentialSynapses(c):
+21.         if active(s) then
+22.             s.permannence += permannenceInc
+23.             s.permannence = min(1.0,s.permannence)
+24.         else
+25.             s.permannence -= permannenceDec
+26.             s.permannence = max(0.0,s.permannence)
+27. 
+28. for c in columns:
+29. 
+30.     minDutyCycle(c) = 0.01 * maxDutyCycle(neighbors(c))
+31.     activeDutyCycle(c) = updateActiveDutyCycle(c)
+32.     boost(c) = boostFunction(activeDutyCycle(c),minDutyCycle(c))
+33.     
+34.     overlapDutyCycle(c) = updateOverlapDutyCycle(c)
+35.     if overlapDutyCycle(c) < minDutyCycle(c) then
+36.         increasePermanences(c,0.1*connectedPerm)
+37. 
+38. inhibitionRadius = averageReceptiveFieldSize()
+```
+
 
 ### 支持的 数据结构 和 例程
 - 在 伪码 中, 用到了 下面的 变量 和 数据结构。
