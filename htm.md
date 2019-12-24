@@ -346,7 +346,9 @@
 - 阶段3：更新synapses
 - 只有在学习的时候,才需要阶段3。然而，不像 空间相似则同表示，当启用学习,阶段1和阶段2 包含 一些 学习-特定的 操作。既然 临时相似则同表示 是 比 空间相似则同表示  显著的 更复杂，我们 首先 列出 只-推理 版本的 临时相似则同表示，紧接着 一个版本,组合 推理和学习。一些 该实现细节、术语、支持例程 的 描述 是 在 本章结尾，在伪码之后。
 
-### - 阶段1
+### - 临时相似则同表示 伪码：只 推理
+
+#### - 阶段1
 
 - 对 每个 细胞,第一解阶段 计算 激活状态。对每个 赢的列,我们 决定 哪些 细胞 应该 变成 激活的。如果 如何一个细胞 预测 自下而上的 输入（即,由于 在先前一个时间步 的 一个 序列 段, 他的 predictiveState是1），然后 这些 细胞 变成 激活的（行4-9）。如果 该 自下而上的 输入 是 非预期的（即,没有 细胞 有 predictiveState输出 开），那么 在 该列中的 每个 细胞 变成 激活的（行11-13）。
 
@@ -364,6 +366,75 @@
 11.     if buPredicted == false then
 12.         for i = 0 to cellPerColumn -1 
 13.             activeState(c,i,t) = 1
+```
+#### - 阶段2
+- 对 每个 细胞,第二个阶段 计算 预测状态。如果 它的segments的任何一个变成激活的,一个细胞会变打开它的predictiveState，即,由于 喂-前 输入,如果 足够个 它的horizontal连接(们) 当前开火。
+
+```python
+14. for c,i in cells
+15.     for s in segments(c,i)
+16.         if segmentActive(c,i,s,t) then
+17.             predictiveState(c,i,t) = 1
+```
+### - 临时相似则同表示 伪码：联合 推理 和 学习
+
+#### - 阶段1
+
+```python
+18. for c in activeColumns(t)
+19. 
+20.     buPredicted = false
+21.     lcChosen = false
+22.     for i = 0 to cellPerColumn - 1
+23.         if predictiveState(c,i,t-1) == true then
+24.             s = getActiveSegment(c,i,t-1,activeState)
+25.             if s.sequenceSegment == true then
+26.                 buPredicted = true
+27.                 activeState(c,i,t) =1 
+28.                 if segmentActive(s,t-1,learnState) then
+29.                     lcChosen = true
+30.                     learnState(c,i,t) = 1
+31.                     
+32.     if buPredicted == false then
+33.         for i = 0 to cellPerColumn -1
+34.             activeState(c,i,t) =1 
+35.             
+36.     if lcChosen == false then
+37.         l,s = getBestMatchingCell(c,t-1)
+38.         learnState(c,i,t) = 1
+39.         sUpdate = getSegmentActiveSynapses(c,i,s,t-1,true)
+40.         sUpdate.sequenceSegment = true
+41.         segmentUpdateList.add(sUpdate)
+```
+
+#### - 阶段2
+
+```python
+42. for c,i in cells
+43.     for s in segments(c,i)
+44.         if segmentActive(s,t,activeState) then
+45.             predictiveState(c,i,t) = 1
+46.             
+47.             activeUpdate = getSegmentActiveSynapses(c,i,s,t,false)
+48.             segmentUpdateList.add(activeUpdate)
+49.             
+50.             predSegment = getBestMatchingSegment(c,i,t-1)
+51.             predUpdate = getSegmentActiveSynapses(c,i,predSegment,t-1,true)
+52.             
+53.             segmentUpdateList.add(predUpdate)
+```
+
+#### - 阶段3
+
+```python
+54. for c,i in cells
+55.     if learnState(s,i,t) == 1 then
+56.         adaptSegments(segmentUpdateList(c,i),true)
+57.         segmentUpdateList(c,i).delete()
+58.     else if predictiveState(c,i,t) == 0 and predictiveState(c,i,t-1) == 1 then
+59.         adaptSegments(segmentUpdateList(c,i),false)
+60.         segmentUpdateList(c,i).delete()
+61.         
 ```
 
 ## 附录 A：生物 神经元 、分层临时记忆 细胞 比较
