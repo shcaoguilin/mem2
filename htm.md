@@ -346,6 +346,26 @@
 - 阶段3：更新synapses
 - 只有在学习的时候,才需要阶段3。然而，不像 空间相似则同表示，当启用学习,阶段1和阶段2 包含 一些 学习-特定的 操作。既然 临时相似则同表示 是 比 空间相似则同表示  显著的 更复杂，我们 首先 列出 只-推理 版本的 临时相似则同表示，紧接着 一个版本,组合 推理和学习。一些 该实现细节、术语、支持例程 的 描述 是 在 本章结尾，在伪码之后。
 
+### - 阶段1
+
+- 对 每个 细胞,第一解阶段 计算 激活状态。对每个 赢的列,我们 决定 哪些 细胞 应该 变成 激活的。如果 如何一个细胞 预测 自下而上的 输入（即,由于 在先前一个时间步 的 一个 序列 段, 他的 predictiveState是1），然后 这些 细胞 变成 激活的（行4-9）。如果 该 自下而上的 输入 是 非预期的（即,没有 细胞 有 predictiveState输出 开），那么 在 该列中的 每个 细胞 变成 激活的（行11-13）。
+
+```python
+01. for c in activeColumns(t):
+02. 
+03.     buPredicted = false
+04.     for i = 0 to cellPerColumn - 1
+05.         if predictiveState(c,i,t-1) == true then
+06.             s = getActiveSegment(c,i,t-1,activeState)
+07.             if s.sequenceSegment == true then
+08.                 buPredicted = true
+09.                 activeState(c,i,t) = 1
+10.                 
+11.     if buPredicted == false then
+12.         for i = 0 to cellPerColumn -1 
+13.             activeState(c,i,t) = 1
+```
+
 ## 附录 A：生物 神经元 、分层临时记忆 细胞 比较
 ### - 生物神经元
 ### - 简单 人工 神经元
