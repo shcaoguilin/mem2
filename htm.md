@@ -472,7 +472,7 @@
 | getBestMatchingSegment(c,i,t) | 在时刻t,对给定列c细胞i，找到 带有最大激活synapses数目 的 段。在找到最匹配,此例程是侵略性的。synapses的紧结值允许低于connectedPerm。激活的synapses个数允许低于activatonThreshold，但是必须高于minThreshold。此例程返回该段下标。如果没找到(任何)段，则返回下标-1。 | 
 | getBestMatchingCell(c) | 对于给定列c，返回 带有最匹配段（如上定义）的 细胞。如果没有细胞有一个匹配段，则返回 带有最少段个数的 细胞。 | 
 | getSegmentActiveSynapses(c,i,t,s,newSynapses=false) | 对段s,返回 包含一个计划的修改们 的 一个segmentUpdate数据结构。在时间步t,让activeSynapses成为激活的synapses列表,(在该列表中)起源细胞有他们的activeState输出为1.。（如果 因该段不存在 而 s为-1,则该列表为空。）newSynapses是一个可选参数,默认为false。如果newSynapse是true，那么newSynapseCount-count(activeSynapses)个synapses被加到activeSynapses中。这些synapses是 在时间步t,有learnState输出为1 的细胞集合 中 随机地选出的。
-| adapatSegments(segmentList,positiveReinforcement) | 该函数遍历一个segmentUpdate列表,并强化每一个段。对每一个segmentUpdate元素，一下修改被执行。如果positiveReinforcement是true,那么在激活列表中的synapses的紧结值按permanenceInc增加。所有其他synapses的紧结值按permanenceDec降低。如果positiveReinforcement是false，那么在激活列表中的synapses紧结值按permanenceDec降低。在这步骤之后，在segmentUpdate中的任何synapses如果已经做过了(刚刚的操作),则用initialPerm加到紧结值。 | 
+| adapatSegments(segmentList,positiveReinforcement) | 该函数遍历一个segmentUpdate列表,并强化每一个段。对每一个segmentUpdate元素，以下修改被执行。如果positiveReinforcement是true,那么在激活列表中的synapses的紧结值按permanenceInc增加。所有其他synapses的紧结值按permanenceDec降低。如果positiveReinforcement是false，那么在激活列表中的synapses紧结值按permanenceDec降低。在这步骤之后，在segmentUpdate中的任何synapses如果已经做过了(刚刚的操作),则用initialPerm加到紧结值。 | 
 
 ## 附录 A：生物 神经元 、多级临时记忆 细胞 比较
 ### - 生物神经元
