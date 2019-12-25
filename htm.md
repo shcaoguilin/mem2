@@ -449,7 +449,7 @@
 | cell(c,i) | 一个细胞列表，用i和c索引 | 
 | cellsPerColumn | 在每个列中的细胞个数 | 
 | activeColumns(t) | 由于自下而上的输入 而 赢的 列 下标 列表（这是空间相似则同表示的输出） | 
-| activeState(c,i,t) | 一个boolean向量,每个细胞一个数字。它表示,在时刻t,给定当前喂-前输入,过去临时上下文,列c细胞i的激活状态。activeState(c,i,t)是 从列c细胞i,在时刻t 的贡献。如果为1，该细胞有当前喂-前输入,也有一个近似的临时上下文。 | 
+| activeState(c,i,t) | 一个boolean向量,每个细胞一个数字。它表示,在时刻t,给定当前喂-前输入,过去临时上下文,列c细胞i的激活状态。activeState(c,i,t)是 在时刻t,从列c细胞i 的贡献。如果为1，该细胞有当前喂-前输入,也有一个近似的临时上下文。 | 
 | predictiveState(c,i,t) | 一个boolean向量,每个细胞一个数字。它表示,在时刻t,给定其他列的自下而上的激活,过去临时上下文,列c细胞i的预测。predictiveState(c,i,t)是 从列c细胞i,在时刻t 的贡献。如果为1，该细胞预测喂-前输入,在当前临时上下文。 | 
 | learnState(c,i,t) | 一个boolean,指示 是否 列c细胞i 被选作学习细胞 | 
 | activationThreshold | 一个段的激活阈值。如果 在一个段中的 激活已连接的synapse个数 比 activationThreshold 大，称 该段 被激活了 | 
